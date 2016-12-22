@@ -20,7 +20,9 @@ module Attributes
       @defaults[attribute.to_sym] = opts[:default]
 
       define_method "#{attribute}" do
-        instance_variable_get("@#{attribute}") || defaults[attribute.to_sym]
+        instance_variable_get("@#{attribute}") || (
+          defaults[attribute.to_sym].respond_to?(:call) ? defaults[attribute.to_sym].call : defaults[attribute.to_sym] 
+        )
       end
 
       attr_writer attribute.to_sym
@@ -31,7 +33,15 @@ module Attributes
     end
 
     def defaults
-      @defaults.clone
+      out = {}
+      @defaults.each do |att, default|
+        begin
+          out[att] = default.clone
+        rescue
+          out[att] = default
+        end
+      end
+      out
     end
   end
 
@@ -43,6 +53,6 @@ module Attributes
   end
 
   def defaults
-    self.class.defaults.clone
+    self.class.defaults
   end
 end
