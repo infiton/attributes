@@ -37,7 +37,7 @@ module Attributes
       @defaults.each do |att, default|
         begin
           out[att] = default.clone
-        rescue
+        rescue TypeError
           out[att] = default
         end
       end
